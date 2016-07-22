@@ -8,8 +8,22 @@ class Chucky
   end
 
   def get_jokes(ids : Array(Int32)) : Array(String)
-    ids.map do |id|
-      get_joke(id)
+
+    # 1. create a channel in the main fiber, type of the channel is specified
+    chan = Channel(String).new
+
+    # 2. Execute get_joke() in a fiber, send the result to a channel
+    ids.map do |x|
+
+      spawn do
+        chan.send(get_joke(x))
+      end
+
+    end
+
+    # 3. receive the results
+    (1..ids.size).map do |x|
+      chan.receive
     end
   end
 end
